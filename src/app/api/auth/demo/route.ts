@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { getSupabaseUrl, getSupabaseAnonKey } from '@/lib/env';
+import { getSupabaseUrl, getSupabaseAnonKey, getDemoPassword } from '@/lib/env';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const role = body.role === 'manager' ? 'manager' : 'writer';
-    const email = `${role}@contexta.local`;
-    const password = 'demo-password-123!';
+    const email = role === 'manager' ? 'manager@contexta-demo.com' : 'writer@contexta-demo.com';
+    const password = getDemoPassword();
 
     const cookieStore = await cookies();
     const supabase = createServerClient(

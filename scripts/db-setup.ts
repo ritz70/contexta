@@ -1,8 +1,30 @@
 // db-setup: Apply supabase/schema.sql via SUPABASE_DB_URL
 // If the variable is missing, print instructions for manual setup
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
+
+// Auto-load .env.local or .env
+for (const envFile of ['.env.local', '.env']) {
+  const envPath = resolve(process.cwd(), envFile);
+  if (existsSync(envPath)) {
+    const lines = readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx !== -1) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        let val = trimmed.slice(eqIdx + 1).trim();
+        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+        if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    }
+  }
+}
 
 async function main() {
   const dbUrl = process.env.SUPABASE_DB_URL;

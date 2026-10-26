@@ -2,6 +2,27 @@
 -- Run this in the Supabase SQL Editor or via `npm run db:setup`
 
 -- ============================================================
+-- Tables
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS organizations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  invite_code text NOT NULL UNIQUE,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  org_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  role text NOT NULL CHECK (role IN ('writer', 'manager')),
+  full_name text NOT NULL,
+  email text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_profiles_org ON profiles(org_id);
+
+-- ============================================================
 -- Helper functions (security definer)
 -- ============================================================
 
@@ -24,27 +45,6 @@ SET search_path = public
 AS $$
   SELECT role FROM profiles WHERE id = auth.uid()
 $$;
-
--- ============================================================
--- Tables
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS organizations (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  invite_code text NOT NULL UNIQUE,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS profiles (
-  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  org_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  role text NOT NULL CHECK (role IN ('writer', 'manager')),
-  full_name text NOT NULL,
-  email text NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS idx_profiles_org ON profiles(org_id);
 
 CREATE TABLE IF NOT EXISTS brand_profiles (
   org_id uuid PRIMARY KEY REFERENCES organizations(id) ON DELETE CASCADE,
