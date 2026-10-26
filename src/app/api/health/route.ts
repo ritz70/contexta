@@ -9,7 +9,7 @@ export async function GET() {
 
   if (supabaseUrl && supabaseKey) {
     try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      const res = await fetch(`${supabaseUrl}/rest/v1/organizations?select=id&limit=1`, {
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`,

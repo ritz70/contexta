@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const role = body.role === 'manager' ? 'manager' : 'writer';
     const email = role === 'manager' ? 'manager@contexta-demo.com' : 'writer@contexta-demo.com';
-    const password = getDemoPassword();
+    let password = getDemoPassword();
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -32,10 +32,21 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    let { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    if (error && password !== 'Contexta#Demo2026') {
+      const retry = await supabase.auth.signInWithPassword({
+        email,
+        password: 'Contexta#Demo2026',
+      });
+      if (!retry.error) {
+        data = retry.data;
+        error = null;
+      }
+    }
 
     if (error) {
       return NextResponse.json(
