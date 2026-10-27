@@ -282,3 +282,52 @@
   height: 0;
   pointer-events: none;
 }
+
+/* ============================================================
+   Interactive & Glassmorphic Utilities
+   ============================================================ */
+
+.glass-panel {
+  background: rgba(13, 31, 54, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(29, 58, 92, 0.7);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(34, 211, 238, 0.15);
+}
+
+.glow-pill-cyan {
+  box-shadow: 0 0 15px -2px rgba(34, 211, 238, 0.35);
+}
+
+.glow-pill-amber {
+  box-shadow: 0 0 15px -2px rgba(255, 179, 71, 0.35);
+}
+
+.glow-pill-purple {
+  box-shadow: 0 0 15px -2px rgba(167, 139, 250, 0.35);
+}
+
+.ambient-mesh {
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(34, 211, 238, 0.12) 0px, transparent 45%),
+    radial-gradient(at 85% 20%, rgba(167, 139, 250, 0.10) 0px, transparent 40%),
+    radial-gradient(at 50% 85%, rgba(255, 179, 71, 0.08) 0px, transparent 50%);
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
+}
