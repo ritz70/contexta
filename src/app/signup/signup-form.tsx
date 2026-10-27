@@ -43,18 +43,21 @@ export function SignupForm() {
         return;
       }
 
-      // Sign in after signup
-      const supabase = createClient();
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      // Sign in after signup via server session endpoint
+      const loginRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const loginData = await loginRes.json();
 
-      if (loginError) {
-        setError('Account created but login failed. Try signing in manually.');
+      if (!loginRes.ok || !loginData.success) {
+        setError('Account created! Please sign in with your credentials.');
         setLoading(false);
         return;
       }
 
-      router.push('/app/workspace');
-      router.refresh();
+      window.location.href = loginData.redirectTo || '/app/workspace';
     } catch {
       setError('Signup failed. Please try again.');
       setLoading(false);

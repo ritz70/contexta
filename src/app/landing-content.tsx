@@ -18,8 +18,7 @@ export function LandingContent() {
       });
       const data = await res.json();
       if (data.ok || data.success) {
-        router.push('/app/workspace');
-        router.refresh();
+        window.location.href = data.redirectTo || '/app/workspace';
       } else {
         alert(data.error?.message || data.error || 'Demo login failed');
       }

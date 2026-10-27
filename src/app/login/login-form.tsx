@@ -55,40 +55,53 @@ export function LoginForm() {
       const data = await res.json();
       if (data.success || data.ok) {
         toast.success(`Welcome back, ${role === 'manager' ? 'Ananya (Manager)' : 'Rohan (Writer)'}!`);
-        router.push(data.redirectTo || '/app/workspace');
-        router.refresh();
+        const queryRedirect = typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('redirect')
+          : null;
+        const target = queryRedirect || data.redirectTo || '/app/workspace';
+        // Hard navigation guarantees browser sends newly written cookie to server and middleware
+        window.location.href = target;
       } else {
-        setError(data.error || 'Authentication failed. Please check demo database setup.');
+        setError(data.error || 'Authentication failed. Please verify demo database is seeded.');
+        setDemoFastTracking(null);
       }
     } catch {
-      setError('Unable to authenticate with demo service.');
-    } finally {
+      setError('Unable to reach authentication service. Please check your connection.');
       setDemoFastTracking(null);
     }
   }
 
-  // Standard form submission
+  // Standard form submission via server-side login endpoint
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const supabase = createClient();
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
       });
 
-      if (authError) {
-        setError(authError.message);
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Invalid email or password.');
         setLoading(false);
         return;
       }
 
       toast.success('Signed in successfully');
-      router.push('/app/workspace');
-      router.refresh();
+      const queryRedirect = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('redirect')
+        : null;
+      const target = queryRedirect || data.redirectTo || '/app/workspace';
+      // Hard navigation ensures session cookie is delivered to middleware
+      window.location.href = target;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign in failed');
       setLoading(false);
