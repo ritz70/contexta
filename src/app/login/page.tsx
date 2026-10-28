@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Shield, Sparkles, ArrowLeft, BookOpen, Layers } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, BookOpen } from 'lucide-react';
 import { LoginForm } from './login-form';
+import { isDemoMode, getDemoPassword } from '@/lib/env';
 
 export const metadata: Metadata = {
   title: 'Sign In — Contexta Brand Sovereign',
@@ -9,6 +10,16 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
+  const demoMode = isDemoMode();
+  let demoPassword: string | null = null;
+  if (demoMode) {
+    try {
+      demoPassword = getDemoPassword();
+    } catch {
+      demoPassword = 'Contexta#Demo2026';
+    }
+  }
+
   return (
     <div
       className="min-h-screen relative flex flex-col justify-between ambient-mesh overflow-hidden"
@@ -65,7 +76,7 @@ export default function LoginPage() {
               Sign in to your Workspace
             </h1>
             <p className="text-small text-muted-foreground max-w-md mx-auto">
-              Select your persona below to authenticate with dedicated writer editing tools or manager review permissions.
+              Sign in with your work email or select a seeded demo account to test role-isolated governance.
             </p>
           </div>
 
@@ -76,7 +87,11 @@ export default function LoginPage() {
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px -5px rgba(34, 211, 238, 0.08)',
             }}
           >
-            <LoginForm />
+            <LoginForm
+              demoMode={demoMode}
+              demoPassword={demoPassword}
+              demoInviteCode="NIMBUS-DEMO"
+            />
           </div>
 
           {/* Footer note & Signup link */}
