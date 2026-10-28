@@ -68,8 +68,7 @@ export function AppShell({ user, profile, orgName, children }: AppShellProps) {
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    window.location.href = '/login';
   }
 
   async function submitFeedback() {
@@ -172,26 +171,46 @@ export function AppShell({ user, profile, orgName, children }: AppShellProps) {
 
             {userMenuOpen && (
               <div
-                className="absolute bottom-full left-0 right-0 mb-1 rounded-lg shadow-lg py-1 z-50"
+                className="absolute bottom-full left-0 right-0 mb-1 rounded-lg shadow-lg py-1 z-50 overflow-hidden"
                 style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
               >
-                <p className="px-3 py-1.5 text-caption truncate" style={{ color: 'var(--muted-foreground)' }}>{profile.email}</p>
-                <div style={{ borderTop: '1px solid var(--border)' }} className="my-1" />
+                <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+                  <p className="text-small font-semibold text-foreground truncate">{profile.full_name}</p>
+                  <p className="text-caption truncate text-muted-foreground">{profile.email}</p>
+                  <div className="mt-1.5">
+                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full capitalize bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-medium">
+                      {profile.role}
+                    </span>
+                  </div>
+                </div>
+
+                {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-small hover:bg-white/5 transition-colors text-foreground text-left"
+                  >
+                    <Users size={14} className="text-cyan-400" />
+                    <span>Switch demo account</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => { setFeedbackOpen(true); setUserMenuOpen(false); }}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-small hover:opacity-80"
-                  style={{ color: 'var(--foreground)' }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-small hover:bg-white/5 transition-colors text-foreground text-left"
                 >
                   <MessageSquarePlus size={14} />
-                  Give feedback
+                  <span>Give feedback</span>
                 </button>
+
+                <div style={{ borderTop: '1px solid var(--border)' }} className="my-1" />
+
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-small hover:opacity-80"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-small hover:bg-white/5 transition-colors text-left"
                   style={{ color: 'var(--red)' }}
                 >
                   <LogOut size={14} />
-                  Sign out
+                  <span>Sign out</span>
                 </button>
               </div>
             )}

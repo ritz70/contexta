@@ -1,34 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Shield, GitBranch, CheckCircle2, FileText, Eye, Send, ArrowRight, Zap, Lock, BarChart3 } from 'lucide-react';
 
 export function LandingContent() {
-  const router = useRouter();
-  const [demoLoading, setDemoLoading] = useState<'writer' | 'manager' | null>(null);
-
-  async function handleDemoLogin(role: 'writer' | 'manager') {
-    setDemoLoading(role);
-    try {
-      const res = await fetch('/api/auth/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role }),
-      });
-      const data = await res.json();
-      if (data.ok || data.success) {
-        window.location.href = data.redirectTo || '/app/workspace';
-      } else {
-        alert(data.error?.message || data.error || 'Demo login failed');
-      }
-    } catch {
-      alert('Demo login failed. Make sure the database is seeded.');
-    } finally {
-      setDemoLoading(null);
-    }
-  }
-
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Nav */}
@@ -40,12 +15,12 @@ export function LandingContent() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/guide" className="text-small px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
+          <Link href="/guide" className="text-small px-3 py-1.5 rounded-lg transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
             Guide
-          </a>
-          <a href="/login" className="text-small px-4 py-2 rounded-lg transition-colors" style={{ color: 'var(--text)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+          </Link>
+          <Link href="/login" className="text-small px-4 py-2 rounded-lg transition-colors" style={{ color: 'var(--text)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
             Sign in
-          </a>
+          </Link>
         </div>
       </nav>
 
@@ -75,24 +50,22 @@ export function LandingContent() {
           </p>
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            <button
-              onClick={() => handleDemoLogin('writer')}
-              disabled={demoLoading !== null}
-              className="px-6 py-3 rounded-lg text-body font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+            <Link
+              href="/login"
+              className="px-6 py-3 rounded-lg text-body font-semibold transition-all hover:opacity-90 inline-flex items-center gap-2"
               style={{ background: 'var(--cyan)', color: 'var(--bg)' }}
             >
-              {demoLoading === 'writer' ? 'Signing in…' : 'Try as Writer'}
-              {!demoLoading && <ArrowRight size={16} className="inline ml-2" />}
-            </button>
-            <button
-              onClick={() => handleDemoLogin('manager')}
-              disabled={demoLoading !== null}
-              className="px-6 py-3 rounded-lg text-body font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+              Sign in or try the demo
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/signup"
+              className="px-6 py-3 rounded-lg text-body font-semibold transition-all hover:opacity-90 inline-flex items-center gap-2"
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' }}
             >
-              {demoLoading === 'manager' ? 'Signing in…' : 'Try as Manager'}
-              {!demoLoading && <ArrowRight size={16} className="inline ml-2" />}
-            </button>
+              Sign up
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>

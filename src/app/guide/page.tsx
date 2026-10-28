@@ -19,20 +19,20 @@ export default function GuidePage() {
         <p className="text-body mt-2" style={{ color: 'var(--muted)' }}>
           Welcome judges! This 10-minute walkthrough covers each scoring category with clear step-by-step instructions.
         </p>
-        <div className="flex gap-4 mt-6">
+        <div className="flex gap-4 mt-6 flex-wrap">
           <Link
-            href="/"
-            className="px-4 py-2 rounded-lg text-small font-semibold transition-opacity hover:opacity-90"
+            href="/login"
+            className="px-4 py-2 rounded-lg text-small font-semibold transition-opacity hover:opacity-90 inline-flex items-center gap-1.5"
             style={{ background: 'var(--cyan)', color: 'var(--bg)' }}
           >
-            ← Back to Home (Try 1-Click Demo)
+            Sign in or try the demo →
           </Link>
           <Link
-            href="/app/workspace"
-            className="px-4 py-2 rounded-lg text-small font-medium"
+            href="/signup"
+            className="px-4 py-2 rounded-lg text-small font-medium inline-flex items-center gap-1.5"
             style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
           >
-            Go Directly to App →
+            Create account (Sign up)
           </Link>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default function GuidePage() {
           { category: 'Technical Depth & Reliability', pts: '25 pts', summary: 'Deterministic rule engine, zero hallucinated blockers, tenant RLS, async AI pass' },
           { category: 'Progress from Round 1', pts: '20 pts', summary: 'Evolved from naive prompt wrapper to 3-tier contextual governance platform' },
           { category: 'Planned Round 3 Improvements', pts: '15 pts', summary: 'CMS webhooks & browser extensions, multi-modal checks, automated rule distillation' },
-          { category: 'Usability Without Guidance', pts: '10 pts', summary: '1-click role logins, pre-loaded sample drafts, inline fix suggestions, zero friction' },
+          { category: 'Usability Without Guidance', pts: '10 pts', summary: 'Demo accounts card, pre-loaded sample drafts, inline fix suggestions, zero friction' },
         ].map((item, idx) => (
           <div key={idx} className="p-4 rounded-xl flex flex-col justify-between" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
             <div>
@@ -72,10 +72,10 @@ export default function GuidePage() {
             <span className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-caption" style={{ background: 'var(--cyan)', color: 'var(--bg)' }}>
               1
             </span>
-            <h3 className="text-body font-bold">1-Click Login (Usability: 10 pts)</h3>
+            <h3 className="text-body font-bold">Sign In with Demo Accounts (Usability: 10 pts)</h3>
           </div>
           <p className="text-small" style={{ color: 'var(--muted)' }}>
-            Go to the homepage and click <strong>&ldquo;Try as Writer&rdquo;</strong> or <strong>&ldquo;Try as Manager&rdquo;</strong>. No setup or registration required. Pre-seeded documents, rules, channels, and audit entries are already in place.
+            Navigate to <strong>/login</strong>. When demo mode is active, the <em>Demo accounts</em> card lists the four pre-seeded team members (Manager Ananya; Writers Rohan, Priya, and Sam). Click <strong>&ldquo;Fill&rdquo;</strong> to populate credentials into the form, then click <strong>&ldquo;Sign in&rdquo;</strong>.
           </p>
         </div>
 

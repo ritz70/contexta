@@ -44,8 +44,10 @@ export async function POST(req: NextRequest) {
       password,
     });
 
+    const next = typeof body.next === 'string' && body.next.startsWith('/app') ? body.next : null;
+
     // If demo account and password mismatch, retry with demo password
-    if (error && (email === 'writer@contexta-demo.com' || email === 'manager@contexta-demo.com')) {
+    if (error && (email.endsWith('@contexta-demo.com') || email === 'writer@contexta-demo.com' || email === 'manager@contexta-demo.com')) {
       const demoPw = getDemoPassword();
       const retry = await supabase.auth.signInWithPassword({
         email,
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     if (error || !data?.user) {
       return NextResponse.json(
-        { error: error?.message || 'Invalid email or password' },
+        { error: 'Wrong email or password' },
         { status: 401 }
       );
     }
@@ -80,7 +82,14 @@ export async function POST(req: NextRequest) {
       .eq('id', data.user.id)
       .single();
 
-    const redirectTo = profile?.role === 'manager' ? '/app/workspace' : '/app/workspace';
+    let redirectTo = profile?.role === 'manager' ? '/app/reviews' : '/app/workspace';
+    if (next) {
+      const managerPages = ['/app/reviews', '/app/analytics', '/app/rules', '/app/channels', '/app/brand', '/app/audit'];
+      const isManagerOnly = managerPages.some((p) => next.startsWith(p));
+      if (!isManagerOnly || profile?.role === 'manager') {
+        redirectTo = next;
+      }
+    }
 
     return NextResponse.json({
       success: true,

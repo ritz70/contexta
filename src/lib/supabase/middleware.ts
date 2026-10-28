@@ -42,7 +42,8 @@ export async function updateSession(request: NextRequest) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
-      url.searchParams.set('redirect', pathname);
+      const destination = pathname + (request.nextUrl.search || '');
+      url.searchParams.set('next', destination);
       return NextResponse.redirect(url);
     }
 
@@ -67,8 +68,20 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect authenticated users away from login/signup
   if ((pathname === '/login' || pathname === '/signup') && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const nextParam = request.nextUrl.searchParams.get('next');
+    let destination = profile?.role === 'manager' ? '/app/reviews' : '/app/workspace';
+    if (nextParam && nextParam.startsWith('/app')) {
+      destination = nextParam;
+    }
     const url = request.nextUrl.clone();
-    url.pathname = '/app/workspace';
+    url.pathname = destination;
+    url.search = '';
     return NextResponse.redirect(url);
   }
 
