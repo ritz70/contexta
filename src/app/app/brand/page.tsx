@@ -15,6 +15,8 @@ import {
   Sparkles,
   ArrowRight,
   RefreshCw,
+  RotateCcw,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface BrandProfile {
@@ -38,6 +40,10 @@ export default function BrandAndTeamPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<'writer' | 'manager'>('writer');
+  const [isDemoOrg, setIsDemoOrg] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberEmail, setNewMemberEmail] = useState('');
@@ -52,6 +58,22 @@ export default function BrandAndTeamPage() {
     setLoading(true);
     const supabase = createClient();
 
+    // Load current authenticated user & role
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      if (myProfile) {
+        setCurrentUserRole(myProfile.role);
+      }
+    }
+
     // Load org / brand profile
     const { data: orgData } = await supabase
       .from('organizations')
@@ -60,6 +82,7 @@ export default function BrandAndTeamPage() {
       .single();
 
     if (orgData) {
+      setIsDemoOrg(Boolean(orgData.is_demo));
       setBrand({
         id: orgData.id,
         name: orgData.name,
@@ -169,6 +192,29 @@ export default function BrandAndTeamPage() {
       setInviting(false);
     }
   }
+
+  // Reset demo environment
+  async function handleResetDemo() {
+    setResetting(true);
+    try {
+      const res = await fetch('/api/brand/reset-demo', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error?.message || 'Failed to reset demo data');
+      } else {
+        toast.success('Demo environment reset successfully! Baseline data restored.');
+        setShowResetModal(false);
+        await loadData();
+      }
+    } catch {
+      toast.error('Network error resetting demo data');
+    } finally {
+      setResetting(false);
+    }
+  }
+
 
   const managerCount = members.filter((m) => m.role === 'manager').length;
   const writerCount = members.filter((m) => m.role === 'writer').length;
@@ -380,6 +426,40 @@ export default function BrandAndTeamPage() {
                 ))}
               </div>
             </div>
+
+            {/* Manager-only Reset Demo Data Card */}
+            {currentUserRole === 'manager' && isDemoOrg && (
+              <div
+                className="p-6 rounded-2xl glass-panel space-y-4"
+                style={{
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(13, 31, 54, 0.5))',
+                }}
+              >
+                <div className="flex items-center gap-2 pb-2 border-b border-red-500/20">
+                  <RotateCcw size={18} className="text-red-400" />
+                  <h2 className="text-body font-bold text-foreground">Reset Demo Data</h2>
+                </div>
+
+                <p className="text-caption text-muted-foreground leading-relaxed">
+                  Wipes and re-seeds all documents, checks, flags, disputes, and analytics history back to the initial demo baseline. The 4 demo accounts and passwords will be preserved.
+                </p>
+
+                <div className="text-[11px] text-amber-400/90 flex items-center gap-1.5 font-mono">
+                  <AlertTriangle size={12} className="flex-shrink-0" />
+                  <span>Rate limited to 3 resets per hour.</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowResetModal(true)}
+                  className="w-full py-2.5 px-4 rounded-xl text-small font-semibold transition-all flex items-center justify-center gap-2 border border-red-500/40 bg-red-500/15 text-red-300 hover:bg-red-500/25 active:scale-98 cursor-pointer"
+                >
+                  <RotateCcw size={14} />
+                  <span>Reset Demo Environment</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -486,6 +566,48 @@ export default function BrandAndTeamPage() {
           </form>
         </div>
       )}
+
+      {/* Reset Demo Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in">
+          <div className="w-full max-w-md p-6 rounded-2xl glass-panel shadow-2xl space-y-5 border border-red-500/30">
+            <div className="flex items-center gap-3 pb-3 border-b border-border/60">
+              <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 flex-shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h3 className="text-body font-bold text-foreground">Reset Demo Environment?</h3>
+                <p className="text-caption text-muted-foreground">This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <p className="text-small text-muted-foreground leading-relaxed">
+              This will wipe all documents, checks, flags, and disputes created in this demo organization and re-seed the baseline demo data and analytics. The 4 demo accounts and your current password will be preserved.
+            </p>
+
+            <div className="flex justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                disabled={resetting}
+                className="px-4 py-2.5 rounded-xl text-small text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleResetDemo}
+                disabled={resetting}
+                className="px-5 py-2.5 rounded-xl text-small font-semibold transition-all flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 cursor-pointer"
+              >
+                {resetting && <RefreshCw size={14} className="animate-spin" />}
+                <span>{resetting ? 'Resetting Data…' : 'Confirm & Reset'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
