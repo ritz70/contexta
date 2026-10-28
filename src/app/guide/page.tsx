@@ -119,7 +119,7 @@ export default function GuidePage() {
           </div>
           <p className="text-small" style={{ color: 'var(--muted)' }}>
             Click <strong>&ldquo;Dispute&rdquo;</strong> on any flag as a writer, type a rationale, and submit.
-            Then switch to the Manager account (via 1-click or sign out/sign in) and open <strong>Reviews</strong>.
+            Then switch to the Manager account (click <strong>&ldquo;Switch demo account&rdquo;</strong> or sign out to /login) and open <strong>Reviews</strong>.
             Approve or overturn the dispute, optionally creating a rule exception!
           </p>
         </div>
@@ -134,6 +134,20 @@ export default function GuidePage() {
           </div>
           <p className="text-small" style={{ color: 'var(--muted)' }}>
             Navigate to <strong>Analytics</strong>. View real-time KPIs, rule friction graphs, channel compliance heatmaps, and AI guideline intelligence summaries.
+          </p>
+        </div>
+
+        {/* Step 6 */}
+        <div className="p-6 rounded-xl space-y-3" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-caption" style={{ background: 'var(--cyan)', color: 'var(--bg)' }}>
+              6
+            </span>
+            <h3 className="text-body font-bold">Verify Per-Writer Data Isolation &amp; Demo Reset</h3>
+          </div>
+          <p className="text-small" style={{ color: 'var(--muted)' }}>
+            <strong>Data Isolation:</strong> Sign in as Priya Nair and verify Rohan&apos;s documents are hidden. Attempting to directly navigate to another writer&apos;s document returns a clean 404.<br />
+            <strong>Demo Reset:</strong> Sign in as Manager Ananya and navigate to <strong>Brand &amp; Team</strong>. Use the <em>Reset Demo Environment</em> card to wipe and re-seed the demo organization back to baseline at any time.
           </p>
         </div>
       </div>

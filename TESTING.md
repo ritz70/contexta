@@ -46,20 +46,53 @@ npm run typecheck
 
 ---
 
-## 3. Manual End-to-End Walkthrough Script
+## 3. Automated Empirical Row Level Security (RLS) Test Suite
+
+Run the comprehensive RLS verification script:
+
+```bash
+npm run test:rls
+```
+
+This script executes 16 empirical security tests using live Supabase authenticated client sessions and application API endpoints:
+
+| Category | Invariant Verified | Method |
+| :--- | :--- | :--- |
+| **Client RLS** | Rohan cannot SELECT Priya's document | Supabase anon client with Rohan auth token |
+| **Client RLS** | Rohan cannot UPDATE Priya's document | Supabase anon client with Rohan auth token |
+| **Client RLS** | Rohan cannot DELETE Priya's document | Supabase anon client with Rohan auth token |
+| **Client RLS** | Rohan cannot SELECT Priya's document checks | Supabase anon client with Rohan auth token |
+| **Client RLS** | Rohan cannot SELECT Priya's flags | Supabase anon client with Rohan auth token |
+| **Client RLS** | Rohan cannot SELECT Priya's disputes | Supabase anon client with Rohan auth token |
+| **Client RLS** | Priya cannot SELECT Rohan's document | Supabase anon client with Priya auth token |
+| **Client RLS** | Manager can view documents across all writers | Supabase anon client with Manager auth token |
+| **Client RLS** | Writer cannot SELECT audit_events | Supabase anon client with Writer auth token |
+| **Client RLS** | Writer cannot INSERT into rules | Supabase anon client with Writer auth token |
+| **API Routes** | `GET /api/documents/[id]` returns 404 for another writer | Server route session cookie check |
+| **API Routes** | `PATCH /api/documents/[id]` returns 404 for another writer | Server route session cookie check |
+| **API Routes** | `DELETE /api/documents/[id]` returns 404 for another writer | Server route session cookie check |
+| **API Routes** | `POST /api/documents/[id]/publish` returns 404 for another writer | Server route session cookie check |
+| **API Routes** | `POST /api/flags/[id]/action` returns 404 for another writer flag | Server route session cookie check |
+| **Cross-Org RLS** | User in separate tenant organization sees zero demo data | Supabase anon client across tenant barrier |
+
+---
+
+## 4. Manual End-to-End Walkthrough Script
 
 Judges and evaluators can verify the complete end-to-end user workflow in under 10 minutes:
 
-### Step 1: 1-Click Login
-1. Open the landing page (`/`).
-2. Click **"Try as Writer"**.
-3. You are automatically signed in as `writer@contexta.local` and redirected to `/app/workspace`.
+### Step 1: Sign In via Demo Accounts
+1. Open the landing page (`/`) and click **"Sign in or try the demo"** (or go directly to [`/login`](/login)).
+2. In the **Demo Accounts** card:
+   - Click **"Fill"** next to **Rohan Verma (Writer)**: email and password auto-populate.
+   - Click **"Sign in"**.
+   - Writers automatically land on **Workspace** (`/app/workspace`).
 
 ### Step 2: Open or Create a Document
-1. In the documents list, select a pre-seeded draft (e.g., **"Q3 Compliance Announcement"**) or click **"New Document"**.
+1. In the documents list, select a pre-seeded draft (e.g., **"Smart Pots Launch Announcement"**) or click **"New Document"**.
 2. Notice the **Channel Selector** at the top right:
-   - Select **Press Release (Strict Mode)**: Notice strict legal rules are active.
-   - Switch to **Twitter / X (Flexible Mode)**: Notice informal language rules are relaxed.
+   - Select **Press Release (Strict Mode)**: Strict legal rules are active.
+   - Switch to **Twitter / X (Flexible Mode)**: Informal language rules are relaxed.
 
 ### Step 3: Trigger Real-Time Inline Checks
 1. Type a forbidden phrase into the editor:
@@ -79,15 +112,31 @@ Judges and evaluators can verify the complete end-to-end user workflow in under 
 1. Click the **"Publish"** button in the header while unaddressed hard flags remain.
 2. Notice the operation is blocked with a clear warning explaining that blocking issues must be resolved first.
 
-### Step 6: Manager Review & Rule Update
-1. Sign out and click **"Try as Manager"** on the home page.
-2. Go to **Reviews** (`/app/reviews`).
+### Step 6: Per-Writer Data Isolation Verification
+1. Note the URL and ID of Rohan's document (e.g. `/app/workspace/abcd-1234`).
+2. Open the user menu in the top-right and click **"Sign out"**.
+3. On `/login`, click **"Fill"** next to **Priya Nair (Writer)** and sign in.
+4. Observe Priya's workspace: Rohan's document is **not visible**.
+5. Paste Rohan's document URL (`/app/workspace/abcd-1234`) into the address bar: observe that the page securely returns a clean **404 Not Found**.
+
+### Step 7: Manager Review & Multi-Writer Oversight
+1. Sign out and sign in as **Ananya Mehta (Manager)**.
+2. Managers automatically land on **Reviews** (`/app/reviews`).
 3. View the dispute submitted in Step 4.
 4. Click **"Overturn & Create Exception"**:
    - Enter decision note: *"Approved for audit quotes."*
    - Click **"Confirm Overturn"**.
-5. Switch back to the document — the flag is now overturned and the document can be published!
+5. Navigate to **Workspace** (`/app/workspace`):
+   - Notice the manager-only **"All writers"** / **"My documents"** toggle.
+   - Click **"All writers"** to oversee documents across Rohan, Priya, and Sam.
 
-### Step 7: Inspect Analytics & Audit Trail
+### Step 8: Reset Demo Environment
+1. As Ananya (Manager), navigate to **Brand & Team** (`/app/brand`).
+2. Scroll to the **"Reset Demo Data"** card in the right column.
+3. Click **"Reset Demo Environment"**.
+4. Confirm the dialog: observe that the demo workspace, documents, flags, and analytics history are wiped and re-seeded back to baseline, while demo user accounts are preserved.
+
+### Step 9: Inspect Analytics & Audit Trail
 1. Visit **Analytics** (`/app/analytics`): View real-time dispute statistics and rule friction heatmaps.
 2. Visit **Audit** (`/app/audit`): View the immutable, timestamped record of every check, dispute, decision, and publication.
+

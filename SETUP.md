@@ -40,40 +40,45 @@ cp .env.example .env.local
 
 ---
 
-## 3. Database Schema Migration
+Contexta provides database schema definitions and migrations:
 
-Contexta provides a migration script that executes the complete PostgreSQL schema (tables, foreign keys, triggers, and Row-Level Security policies):
+1. **Full Schema**: [`supabase/schema.sql`](./supabase/schema.sql) — Contains the complete, canonical schema definition, tables, foreign keys, triggers, and Row-Level Security policies.
+2. **Auth & Data Isolation Migration**: [`supabase/migrations/002_auth_isolation.sql`](./supabase/migrations/002_auth_isolation.sql) — Idempotent migration adding the `is_demo` flag and per-writer RLS policies (`documents`, `document_checks`, `flags`, `disputes`, `audit_events`).
 
+If `SUPABASE_DB_URL` is configured in `.env.local`:
 ```bash
 npm run db:setup
 ```
 
-Alternatively, you can copy the contents of [`supabase/schema.sql`](./supabase/schema.sql) directly into the Supabase SQL Editor.
+Alternatively, open your Supabase Dashboard → **SQL Editor**, paste the contents of [`supabase/migrations/002_auth_isolation.sql`](./supabase/migrations/002_auth_isolation.sql) (or [`supabase/schema.sql`](./supabase/schema.sql)), and click **Run**.
 
 ---
 
 ## 4. Seeding Initial Data & Demo Accounts
 
-Run the comprehensive seeding script:
+Run the seeding script:
 
 ```bash
 npm run seed
 ```
 
 This populates:
-1. **Organization**: "Nimbus Financial Technologies"
-2. **Demo Users**:
-   - **Manager**: `manager@contexta-demo.com` / `demo-password-123!`
-   - **Writer**: `writer@contexta-demo.com` / `demo-password-123!`
+1. **Organization**: "Nimbus Financial Technologies" (`is_demo = true`, invite code `NIMBUS-DEMO`).
+2. **Demo Accounts** (Shared password: `Contexta#Demo2026`):
+   - **Ananya Mehta** (`manager@contexta-demo.com`) — Manager
+   - **Rohan Verma** (`writer@contexta-demo.com`) — Writer
+   - **Priya Nair** (`priya@contexta-demo.com`) — Writer
+   - **Sam Carter** (`sam@contexta-demo.com`) — Writer
 3. **Channels**: Press Release (Strict), Company Blog (Balanced), Twitter / X (Flexible), Newsletter, Slack.
 4. **Starter Rules & Overrides**: Terminology casing, forbidden claims, required disclaimers, length limits.
 5. **Sample Drafts**: Pre-loaded articles in various states of compliance.
 6. **30-Day Historical Data**: Pre-seeded check events, disputes, and friction alerts for analytics.
 
-*Shortcut to run both database setup and seed:*
+*Verify Data Isolation:*
 ```bash
-npm run setup
+npm run test:rls
 ```
+
 
 ---
 

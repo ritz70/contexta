@@ -109,3 +109,43 @@ This document provides a comprehensive breakdown of all features and capabilitie
   - Dedicated reading hub for writers to browse active rules, do's & don'ts, and channel constraints without manager editing privileges.
 - **Judge Walkthrough (`/guide`)**:
   - Self-guided 10-minute test script highlighting every Hackathon scoring rubric dimension.
+
+---
+
+## 8. Authentication, Per-Writer Data Isolation & Demo Access
+
+- **Secure Session Authentication (`/login`)**:
+  - Real email/password authentication using Supabase SSR session cookies.
+  - Password visibility toggle (show/hide).
+  - Unauthenticated route guarding via Next.js middleware with automatic `?next=<path>` redirection.
+  - Role-based post-login routing: Managers land on `/app/reviews`; Writers land on `/app/workspace`.
+- **Demo Accounts Card (`/login`)**:
+  - Active when `NEXT_PUBLIC_DEMO_MODE=true`.
+  - Lists 4 seeded demo accounts with role badges:
+    - **Ananya Mehta** (`manager@contexta-demo.com`) — Manager
+    - **Rohan Verma** (`writer@contexta-demo.com`) — Writer
+    - **Priya Nair** (`priya@contexta-demo.com`) — Writer
+    - **Sam Carter** (`sam@contexta-demo.com`) — Writer
+  - One-click "Fill" buttons for instant credential population.
+  - One-click copy buttons for the shared demo password and `NIMBUS-DEMO` invite code.
+  - Clear data isolation disclosure: *"Each writer sees only their own documents. The manager sees everyone's."*
+- **Per-Writer Row Level Security (RLS) Isolation**:
+  - Database-enforced isolation across `documents`, `document_checks`, `flags`, and `disputes`.
+  - Writers can only SELECT, INSERT, UPDATE, or DELETE records where `documents.author_id = auth.uid()`.
+  - Attempting to access another writer's document via direct URL (`/app/workspace/[id]`) or API (`/api/documents/[id]`) returns a clean 404 Not Found.
+  - Workspace document listing strictly isolates drafts per writer; the "All writers" filter toggle is manager-only.
+  - Cross-tenant multi-tenant safety guarantees users from other organizations see zero demo data.
+- **Self-Service Organization Onboarding (`/signup`)**:
+  - **Create Organization**: Creates a new tenant organization with starter channels and rules; sets the creator as Manager.
+  - **Join with Invite Code**: Joining with `NIMBUS-DEMO` creates a new Writer in the demo organization with an empty workspace.
+  - Input validation with clear error messages for invalid invite codes and duplicate emails.
+- **Manager-Only Demo Environment Reset (`/app/brand`)**:
+  - Dedicated maintenance card rendered only for Managers of demo organizations (`is_demo = true`).
+  - Confirmation modal warning that custom drafts and disputes will be cleared.
+  - Protected API route (`POST /api/brand/reset-demo`) that wipes and re-seeds only that organization's documents, checks, flags, disputes, and analytics history.
+  - Preserves the 4 baseline demo accounts and passwords.
+  - Rate-limited to 3 resets per hour with immutable audit event logging (`action: 'reset_demo_data'`).
+- **Empirical RLS Validation Suite (`npm run test:rls`)**:
+  - Automated test runner verifying 16 distinct security invariants across client queries, API routes, and tenant boundaries.
+  - Outputs a clear PASS/FAIL results table.
+

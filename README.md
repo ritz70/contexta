@@ -31,15 +31,29 @@ Enterprise teams write copy for dozens of distinct destinations — from high-st
 
 ---
 
-## ⚡ Quick Start (Self-Guided Judge Demo)
+## ⚡ Quick Start & Evaluator Access
 
-### 1-Click Demo Logins
-On the landing page, click:
-- **"Try as Writer"** — Log in as `writer@contexta.local` (draft copy, run checks, accept suggestions, dispute false positives).
-- **"Try as Manager"** — Log in as `manager@contexta.local` (manage channels, configure rules, decide disputes, view analytics & audit logs).
+### Sign In & Demo Access (`/login`)
+Visit [`/login`](http://localhost:3000/login) (or click **"Sign in or try the demo"** on the landing page). When running in demo mode (`NEXT_PUBLIC_DEMO_MODE=true`), the login page provides a **Demo Accounts Card** with one-click **"Fill"** buttons for 4 seeded personas:
+- **Ananya Mehta** (`manager@contexta-demo.com`) — Manager (lands on `/app/reviews` with full org-wide review, rule configuration, audit oversight, and demo reset authority).
+- **Rohan Verma** (`writer@contexta-demo.com`) — Writer (lands on `/app/workspace` with pre-seeded sample drafts).
+- **Priya Nair** (`priya@contexta-demo.com`) — Writer (isolated workspace; can only view and edit Priya's documents).
+- **Sam Carter** (`sam@contexta-demo.com`) — Writer (isolated workspace; cannot view Rohan or Priya's documents).
+
+**Shared Demo Password:** `Contexta#Demo2026`  
+**Demo Organization Invite Code:** `NIMBUS-DEMO` (use on [`/signup`](http://localhost:3000/signup) to join as a fresh writer with an empty workspace).
+
+> **Data Isolation Rule:** *Each writer sees only their own documents. The manager sees everyone's.*
 
 ### Interactive Walkthrough
-Visit [`/guide`](http://localhost:3000/guide) at any time for the guided 10-minute test script.
+Visit [`/guide`](http://localhost:3000/guide) at any time for the guided 10-minute evaluator test script.
+
+### Verify Data Isolation
+Run the automated empirical RLS test suite:
+```bash
+npm run test:rls
+```
+
 
 ---
 
