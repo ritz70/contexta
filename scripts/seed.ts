@@ -89,6 +89,7 @@ async function main() {
     .insert({
       name: demoBrand.name,
       invite_code: demoBrand.inviteCode,
+      is_demo: true,
     })
     .select('id')
     .single();

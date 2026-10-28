@@ -59,7 +59,8 @@ export async function POST(
     }
 
     const { data: doc } = await supabase.from('documents').select('*').eq('id', documentId).single();
-    if (!doc || !doc.channel_id) return NextResponse.json({ flags: [], llm_status: 'skipped' });
+    if (!doc) return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Document not found' } }, { status: 404 });
+    if (!doc.channel_id) return NextResponse.json({ flags: [], llm_status: 'skipped' });
 
     const content = doc.content || '';
     if (content.length > 8000) {

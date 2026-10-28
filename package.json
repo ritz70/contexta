@@ -11,6 +11,7 @@
     "test": "vitest run",
     "db:setup": "tsx scripts/db-setup.ts",
     "seed": "tsx scripts/seed.ts",
+    "test:rls": "tsx scripts/test-rls.ts",
     "setup": "npm run db:setup && npm run seed"
   },
   "dependencies": {

@@ -57,6 +57,7 @@ export function WorkspaceContent({ documents, flagCounts, channels, isManager, u
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'strict' | 'balanced' | 'flexible' | 'published'>('all');
+  const [managerScope, setManagerScope] = useState<'all' | 'mine'>('all');
 
   async function createNewDraft(title?: string, content?: string, channelSlug?: string) {
     setCreating(true);
@@ -115,12 +116,13 @@ export function WorkspaceContent({ documents, flagCounts, channels, isManager, u
         (doc.profiles?.full_name && doc.profiles.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       if (!matchesSearch) return false;
+      if (isManager && managerScope === 'mine' && doc.author_id !== userId) return false;
 
       if (selectedFilter === 'all') return true;
       if (selectedFilter === 'published') return doc.status === 'published';
       return doc.channels?.mode === selectedFilter;
     });
-  }, [documents, searchQuery, selectedFilter]);
+  }, [documents, searchQuery, selectedFilter, isManager, managerScope, userId]);
 
   // Aggregate metrics
   const metrics = useMemo(() => {
@@ -275,6 +277,34 @@ export function WorkspaceContent({ documents, flagCounts, channels, isManager, u
             className="w-full pl-10 pr-4 py-2 rounded-xl text-small outline-none border border-border bg-card text-foreground transition-all focus:border-cyan-400"
           />
         </div>
+
+        {/* Manager-only Author Scope Toggle */}
+        {isManager && (
+          <div className="flex items-center gap-1 p-1 rounded-xl glass-panel">
+            <button
+              type="button"
+              onClick={() => setManagerScope('all')}
+              className={`px-3 py-1.5 rounded-lg text-caption font-semibold transition-all ${
+                managerScope === 'all'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              All writers
+            </button>
+            <button
+              type="button"
+              onClick={() => setManagerScope('mine')}
+              className={`px-3 py-1.5 rounded-lg text-caption font-semibold transition-all ${
+                managerScope === 'mine'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              My documents
+            </button>
+          </div>
+        )}
 
         {/* Mode filter pills */}
         <div className="flex items-center gap-1.5 p-1 rounded-xl glass-panel overflow-x-auto">
